@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 const initialStories = [
   {
@@ -72,28 +73,27 @@ const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
 const App = () => {
 
-  const [searchTerm, setSearchTerm] = useSemiPersistentState('search', '');
+  const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
+
+  const [ url, setUrl ] = React.useState(`${API_ENDPOINT}${searchTerm}`); 
 
   const [stories, dispatchStories] = React.useReducer(
     storiesReducer,
     { data: [], isLoading: false, isError: false }
     );
 
-  const handleFetchStories = React.useCallback(() => {
-      if (!searchTerm) return;
-
+  const handleFetchStories = React.useCallback( async() => {
       dispatchStories({ type: 'STORIES_FETCH_INIT' })
-
-      fetch(`${API_ENDPOINT}${searchTerm}`)
-      .then(response => response.json())
-      .then(result => {
+      try {
+        const result = await axios.get(url);
         dispatchStories({
           type: 'STORIES_FETCH_SUCCESS',
-          payload: result.hits,
+          payload: result.data.hits,
         });
-      }).catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
-      )
-  }, [searchTerm]);
+      } catch {
+        dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
+      }
+  }, [url]);
 
   React.useEffect(() => {
     handleFetchStories();
@@ -106,7 +106,9 @@ const App = () => {
     });
   }
 
-  const handleSearch = event => setSearchTerm(event.target.value);
+  const handleSearchInput = event => setSearchTerm(event.target.value);
+
+  const handleSearchSubmit = () => setUrl(`${API_ENDPOINT}${searchTerm}`);
   
   // const searchedStories = stories.data.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -114,10 +116,11 @@ const App = () => {
       <div>
         <h1>My Hacker Stories</h1>
 
-        <InputWithLabel id="Search" isFocused value={searchTerm} onSearch={handleSearch}>
+        <InputWithLabel id="Search" value={searchTerm} isFocused OnInputChange={handleSearchInput}>
          <strong>Search:</strong> 
         </InputWithLabel>
 
+        <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>Submit</button>
         <hr />
 
         {stories.isError && <p>Something went wrong ...</p>}
@@ -131,7 +134,7 @@ const App = () => {
     );
   }
 
-  const InputWithLabel = ({id, value, onSearch, type='text', children, isFocused}) => {
+  const InputWithLabel = ({id, value, OnInputChange, type='text', children, isFocused}) => {
     const inputRef = React.useRef();
 
     React.useEffect(() => {
@@ -142,7 +145,7 @@ const App = () => {
   return (
       <>
         <label htmlFor={id}>{children} </label>
-        <input id={id} type={type} value={value} onChange={onSearch} ref={inputRef}/>
+        <input id={id} type={type} value={value} onChange={OnInputChange} ref={inputRef}/>
       </>
   )};
 
