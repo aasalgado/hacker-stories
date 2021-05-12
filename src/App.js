@@ -116,12 +116,10 @@ const App = () => {
   // const searchedStories = stories.data.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-      <div>
-        <h1>My Hacker Stories</h1>
+      <div className="container"> 
+        <h1 className="headline-primary">My Hacker Stories</h1>
 
         <SearchForm searchTerm={searchTerm} onSearchInput={handleSearchInput} onSearchSubmit={handleSearchSubmit}/>
-
-        <hr />
 
         {stories.isError && <p>Something went wrong ...</p>}
 
@@ -135,12 +133,12 @@ const App = () => {
   }
 
   const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
-    <form onSubmit={onSearchSubmit}>
+    <form onSubmit={onSearchSubmit} className="search-form">
     <InputWithLabel id="Search" value={searchTerm} isFocused OnInputChange={onSearchInput}>
     <strong>Search:</strong> 
     </InputWithLabel>
 
-    <button type="submit" disabled={!searchTerm}>Submit</button>
+    <button type="submit" disabled={!searchTerm} className="button button_large">Submit</button>
   </form>
   );
 
@@ -154,7 +152,7 @@ const App = () => {
     });
   return (
       <>
-        <label htmlFor={id}>{children} </label>
+        <label htmlFor={id} className="label">{children} </label>
         <input id={id} type={type} value={value} onChange={OnInputChange} ref={inputRef}/>
       </>
   )};
@@ -163,15 +161,15 @@ const App = () => {
   const List = ({ list, onRemoveItem}) => list.map(item => <Item key={item.objectID} {...item} onRemoveItem={onRemoveItem}/> );
 
   const Item = ({ url, title, author, num_comments, points, objectID, onRemoveItem }) => (
-    <div>
-      <span>
+    <div className="item">
+      <span style={{ width: '40%'}}>
         <a href={url}>{title}</a>
       </span>
-      <span>{author}</span>
-      <span>{num_comments}</span>
-      <span>{points}</span>
-      <span>
-        <button type="button" onClick={() => onRemoveItem(objectID)}>
+      <span style={{ width: '30%' }}>{author}</span>
+      <span style={{ width: '10%' }}>{num_comments}</span>
+      <span style={{ width: '10%' }}>{points}</span>
+      <span style={{ width: '10%' }}>
+        <button type="button" onClick={() => onRemoveItem(objectID)} className="button button_small">
           Dismiss
         </button>
       </span>
